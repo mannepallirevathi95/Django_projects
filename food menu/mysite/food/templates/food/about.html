@@ -1,0 +1,31 @@
+{% extends 'food/base.html' %}
+{% load static %}
+
+{% block body %}
+<div class="container">
+    <h2 class="text-center">list of items</h2>
+    <center>
+
+        <table class="table">
+            <thead class="text-center">
+                <tr>
+                    <th scope="col">sl.no</th>
+                    <th scope="col">name of the item</th>
+                    <th scope="col">price</th>
+                </tr>
+            </thead>
+            <tbody class="text-center">
+                {% for item in items %}
+                <tr>
+                    <th>{{ forloop.counter }}</th>
+                    <td>{{ item.item_name }}</td>
+                    <td>{{ item.item_price }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </center>
+</div>
+
+{% endblock %}
+    

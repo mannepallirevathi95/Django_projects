@@ -1,0 +1,274 @@
+what i did...
+
+1. startproject(mysite)
+2. startapp(food)
+3. foodapp -- created a httpresponse, imported httpresponse
+4. foodapp -- created a urls.py (to map the requests which are created in views)
+5. conected -- foodapp urls to project urls and given a path with keyword as 'include'
+6. urls internal work?
+
+    request;(localhost:8000/food/hello/)
+    ROOT_URLCONF
+    settings.py; ROOT_URLCONF = 'mysite.urls'
+    mysite.urls; (search for path matches -- path('foo/',food.urls))
+    food.urls; (search for path matches ---- views.index)
+    views.py; ('display')
+
+7. added food-req extention as /food/item( this time didint used mmysite urls)
+
+#################### basic app of Django created ##############################
+
+8. DataBase connections 
+	modely.py --- a blueprint to create tables in Db--- defines the whole structure of a table in Db.
+	settings.py --- configured the Db, either postgres/ SQLite etc..
+   Note:
+	projects maybe 01
+	but... apps inside it are many
+	if we are using that particular app, we need to specify to the project
+	settings.py -- installed apps -- specifying the app name
+9. Imp commands;
+	'python manage.py migrate' -- it will create the Db tables for all the intalled apps in settins.py -- which are required for sytem only "not our Db"
+	this primary step. Now;
+	include app-name in installed apps -- write the table structure that what we have to create, into modely.pyas class format.
+	give command : 'python manage.py makemigrations food' -- food is the name of the app.
+	this is secondary step ; we just added the model here, now we have to create actual Db
+	'python manage.py sqlmigrate food 001'
+	'python manage.py migrate'
+
+10. storing data in Db:
+
+	from above we created a table contains one or two fields but they are empty now.
+	
+	Django provides Db abstaction API; Create -- Update -- Delete 
+
+	creation is a class - objects based concepts(OOPS)
+		- we ingenerel create a class with class name.
+		- assigning the variables 
+		- finally, creating an object for that class.
+
+	Now, by using interactive shell it comes easy
+		- python manage.py shell
+		- before we creating the obj, we need to import the particular class with className from models.
+		- from food.models import Item
+		- creating an obj example; a = Item(item_name = "Pizza", item_discrip = "sausage", ..........etc....)
+		- a.save()
+		- like wise... a1.save(); a2.save(); a3.save()....
+		- Item.objects.all() ---- gives info
+		- use __str__ in defined-class to see the items ina named format
+		- Now; exit()
+		- repeat the process for any doubt.
+	Note: actually it is traditinal way to include data, but for huge data, it comes difficult. WE NEED ADMIN for this.
+
+11. we already know how to create admin.
+12. Retrieve Data;
+	Ex: for retrieving the data from any table we need Queryset(collection of obj stored into a Db)
+	    to get Queryset we need manager
+	    (model -- item) + (manager  -- obj) == Queryset
+	    -------------------simple-------------------
+	item.object.all()
+13. Read data from Db;
+
+	- in views.py import Item from models
+	- item_list = Item.objects.all()
+	- give this item_list as a HttpResponse
+
+
+####################################### database connections completed #################################
+
+14. Templates;
+	- taking html code and taking DB content.
+	- Django template engine
+	- template folder with some html files
+	- loading template; by import loader -- loader.get_template('food/index.html')
+	- rendering template; template needs context(context means data from database that what we have to show)
+	- context --- querying the database
+	- template + context = render
+
+15. deplaying items in page as what we wished 
+	- index.html; jinja template
+	- forloop
+	- content of data comes under this for loop
+	- we can finally render it in return by; request from the templated path to the context of that particular page
+16. Need of templates;
+	- (data from Db (@dynamic)) + (layout/structure(@static)) = template
+
+17. create a detail view of inside components;
+	- created a detail view in views.py and set a path for individual conponent
+	- create detail template as jst before as index template
+	
+18. removing harcoded url and namespacing;
+	
+19. creation of nav-bar;
+	- copy and paste bootstrap link
+	- create a nav bar
+	- create a base template (we can't copy paste nav bar everywhere)
+
+20. adding image field; --models.py add another field
+	- add item_image
+	- python manage.py makemigrations food
+	  python manage.py sqlmigrate food 0002
+	  python manage.py migrate
+	- display the image in index page
+	- modified detail view page
+
+21. creating django forms(CRUD)
+	- procedure is same as above; setting up a view -- path connection  an url -- connected to a page as template;
+	- in views of foodapp 'add items'
+	- new .py file in foodapp as forms.py
+	- imported forms from Django and models from Item
+	- given the model and telling the fields that are needed
+	- template creation; form tag -- CSRF token tag(for security)
+	- creating a view for it;
+	- work flow;
+	goto -- path:food/add -- it goto create_item in view -- creates an obj from ItemForm class --
+	in forms.py -- it sees the model and fields -- create new form with those particular fields --
+	renders a template for the form, item-from.html -- submission -- if it is valid,it will get saved
+
+22. Authentication;
+	- user registration form
+	- creating a new app for this purpose as users
+	- django-admin startapp users
+	- everything is inbuilt in django, hence we have to know how to use it
+	- import forms in views
+	- defining a code for registration 
+	- including this app-path in main urls
+	- created a trmplate for as register.html
+	- created confirmation messages that 'success!'
+	- after a successfull registration, it should display a message
+	- food app -- base.html -- in here create a jinja template for messages.
+	- saving data from user
+	- adding email to user registration form
+	- adding additinal field to django form --- by extending the form
+
+23. here comes the inheritence concept
+	- we cant modify the exixting code but we can create a new one and inherit from base code
+	- users app -- forms.py 
+	- after created the class, we have to use tthis class now.
+	- replace UsercreationForm to RegisterForm by importing RegisterForm in views.
+
+24. log in and log out functionalities
+	- addind path for login as we done before  for register
+	- django has inbuilt login mechanism; main urls -- import views -- path defining
+	- create template for this functionality
+	- redirecting the path; settings.py -- mention login_redirection
+	- log in log out completion
+	- adding login/logout option to navbar in base.html
+25. restricting routes;
+	- users app -- views.py -- create a profilepage code and render it to a profile.html
+	- defining a path of profile in main urls path
+	- link in profile to navbar
+	- settings -- add LOGIN_URL
+
+26. profile page creation;
+	- creating a new model and extend it to current model
+	- make migrations and migrate it
+	- register in admin.py
+	- working with this user profiles;
+	- to know the image uploaded area --- cmd ---
+		python manage.py shell
+		from django.contrib.auth.models import User 
+		user = User.objects.filter(username = 'test').first()
+		user.profile
+		user.profile.image
+		--- it is actually there but if you wanted to see, goto food menu --- mysite --- profilepictures
+	- we have to change the path of those images.
+	- settings.py -- MEDIA_ROOT = os.path.join(BASE_DIR,'pictures')
+					 MEDIA_url = '/pictures/'
+
+	- adding user profile picture;
+		profile.html -- image url
+		google -- https://docs.djangoproject.com/en/4.1/howto/static-files/ --- Serving files uploaded by a user during development -- copy paste the code
+
+	- adding default image for the profile
+	- created a random1 as username without a picture
+
+27. Django signals and class based views
+	- user reg process --- a signal generated from users -- pass on to user profiles;
+	- users app --- create signals.py --- creation-postsavesignal
+	- postsavesignal; whenever user registers, this signal tells that particular user had "actually registered". based on this signal we can create a profile for them.
+	- importation of post_save from signals also import user from auth.models
+	- we need to send as well as recieve the signals
+	- now, creation of profile 
+	- a decorator function; this function is called when it recieves post_save signal, from sender as user
+	- we need to import the signals which we are used
+	- apps.py; 
+	- here what we do is --- we are manually creating the profilefor each user but from now the profile for user is automatically created
+
+28. class based views in django
+	- we have seen upto only function based views but 
+	  there is also another aspect called class based view.
+	- for example; in food app -- views.py --- func:index ; can be witten as classbased view
+	- index-func in as class-based-list-view
+	- django provides inbuiltly the list-view, which we had mentioned as a list of items in function view 
+	  and it also provies detail_view, delete..etc.
+	- implementation;
+		- importing the listview from django
+		- defininga class with class name as IndexClassView and inherit the listview
+		- we meed to add only 3 fields; model, template, context
+		- must: give path name as along like as_view()
+		- like wise, class based detail-view;
+	- implementation for detail-view;
+
+29. add user to post;
+	- 1st person add an item. now when second person logged in, he must known that this item is posted by 1st person
+	- adding a user field to store that kind of particulardata.
+	- import user model in models.py of food app
+	- establishing a connection btwn 2 models; i.e, Item to User.
+	- "use one model as a foreign key to another model".
+	- for that adding a new field in existing table Item.
+	- field is; user_name and its is foriegnKey with an assisiation of User model.
+	- terminal; python manage.py 
+					- makemigrations
+					- sqlmigrate food 0005
+					- migrate
+	- run the surver and check into the admin.
+	- add-item in the items, you can see only some limited people to be set as an username field.
+	- checking; if we click on that particular item you can able to see the username of that particular item.
+	- drawback : user need to add the item when the login of them is occured. not by admin interfaced.
+
+30. Admin get absolute URL method;
+	- defining get_absolute_url in Item model.
+	- this will returns detail pageed url and a keyword arguments.
+
+31. Automating user assosiation:
+	- converting a function based view as a class based view.
+	- food -- views -- create_item() -- [converting this to class based view]
+	- like what DetailView, need to import CreateView.
+	- CreateItem(CreateView)
+	- a classs with model and fields and a instance method
+	- method is here a form method for username and instance is username
+	- now the username is equating to self. request bu getting the user details from the login field
+	- the method super().form_valid
+	- change url pattern in 'add' path
+	- run server -- login as regular user -- add item; 
+	- login as admin -- check the user name -- you can see the login name.
+	- you can add username to home page by using html in index.html
+
+DESIGN TOUCHUP - DT
+
+32. DT-form;
+	- improve the login page
+	- goto login.html -- give 'extends' jinja template
+	- using bootstrap for styling.
+33. DT-register;
+	- improve register page
+	- same as above  but in register.html
+34. DT-add item page;
+	- improve add-food page
+	- same as sbove but in item-form.html
+
+35. what we learned;
+ - VIEWS
+ - URL PATTERNS
+ - models
+ - ADMIN PANEL
+ - TEMPLATES 
+ - STATIC FILES 
+ - AUTHENTICATION 
+ - DJANGO SIGNALS 
+ - CLASS BASED VIEWS
+
+Upto here we completed 70%
+
+###############################
+

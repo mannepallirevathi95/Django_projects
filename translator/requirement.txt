@@ -1,0 +1,245 @@
+after successfull installation of django;
+cmd : django-admin startproject translator
+you can see a manage.py file and folder contains no.of .py files. 
+we can start the app by doing;
+    - cmd : python manage.py runserver
+    - cmd : python manage.py migrate
+
+ADMIN - USER - INTERFACE
+===========================================
+
+    - cmd : python manage.py createsuperuser
+    # choose credentials
+    - cmd : username - reetu
+            email - mrevathi1812@gmail.com
+            password - sridevi@123
+    # run again as runserver
+    # into admin portal
+    # give credentials and we can we can see user interface.
+
+    # this interface has 2 sections; groups and users
+    # to include an aurthor who create content to our block; goto user and add them.
+
+SETTING UP AN EMPTY BLOG app
+===========================================
+
+    - cmd : python manage.py startapp website
+    # in the above command, it will start the app by app-name as website
+    # and hence it will create a folder same as translator and it will also creates a folder - migrations.
+    # migrtions; is a change in database like sql queries.
+
+CREATING A DB MODEL FOR website - app
+==============================================
+
+    - include this website in INSTALLED APPS in settings.py
+
+    - goto website folder --- models.py
+    -   
+        from django.contrib.auth.models import User
+        STATUS = ((0, 'Draft'), (1, 'Publish'))
+
+
+        class Post(models.Model):
+            title = models.CharField(max_length = 200)
+            content = models.TextField()
+            date_created = models.DateTimeField(auto_now_add = True)
+            slug = models.SlugField(max_length = 200, unique = True)
+            auther = models.ForeignKey(to = User, on_delete = models.CASCADE)
+            status = models.IntegerField(choices = STATUS, default = 0)
+    - cmd : python manage.py makemigrations
+    - cmd : python manage.py migrate
+    # these both commands will apply sql commands
+    # you can get output in terminal as "Apply all migrations ... ok"
+
+OVERWIEW OF WEB APP ARCHITECTURE
+============================================
+
+    1. web page that a user sees;
+        - some title
+        - some content
+        - name of the aurthor
+        - date of that particular blog post was created 
+        - a webpage contains a personal url like -- examples.com/dogs
+    
+    2. developer sees;
+        - html file that translates to page
+        - html tags and django tags as <> and {}
+        - now the django tags, i.e, {contents}, {title},...etc. comes from DB
+        - DB contains -- tables of mutliple columns of data that recquired. as well as a slug field.
+        - each thing in DB columns connect individually as per the requirement
+
+    3. structure to connect DB 
+        - defining in classes in models.py
+        - this will corresponds to the database tables
+        - not entering any values but defining  just a sturcture of the table.
+
+    4.  urls.py
+        - taking care of user wished page
+        - urls like --- example.com/dogs
+                        example.com/cats 
+                        example.com/dogs/category
+                (basic thing):
+                        abc.com/slug/view.blog
+
+                        abc.com --- domian name(ex: amazon.com, flipcart.com etc)
+                        slug --- nothing but a subpage in main page
+                                 (ex: Animal - mainpage
+                                      /dogs - subpage#1
+                                      /cats - subpage#2)
+                        views.blog --- if slugfield succesfully done, it loads the info of that particular subpage from views.py
+
+    5. views.py
+        - defined as a class that takes cares all the "user requests"
+        - serves to user
+        - views connect to template and template connect to contents of the DB, DB gets "what is what to show " info from models.py and urls.py will maps the info to template
+    
+    6. admin interface
+        - an optional
+        - admin writes info manually and it connects and saved into DB.
+
+HTML TEMPLATES
+==========================
+
+    - my main folder : TRANSLATOR -(inside it) - translator
+    - in main folder --- 2 subfolders
+            1. translator(config for django project)
+            2. website(config for django web-app)
+    - now in the main folder translator;
+            - create another folder for templates as "templates"
+            - inside templates create a html "website.html"
+            - we want text like thats comes from DB table
+            - django template language as "{{...something here...}}" --- to make it dynamic
+            - <h1>{{object.title}}</h1>
+              <p>{{object.content}}</p>
+              <p>{{object.author}}</p>
+            - now this template is to be connect with the models.py file
+
+    - goto subfolder#1 --- translator --- settings.py --- (scroll down) --- add;
+            import os
+
+            TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
+
+DJANGO VIEWS 
+=======================
+
+- the above html templates shoulb be conneted to models.py file.
+- in a way, connect html to DB(website.html in templtes to class-post of models.py in website app)
+- goto -- website-folder -- views.py --- create a view;
+- from django.views import generic
+        class WebsiteView(generic.DetailView):
+                model = Post
+                template_name = 'website.html'
+
+# from translator.website.models import Post
+# runserver
+
+URL PATTERNS
+============================
+
+- enter dummy data
+- goto website folder --- create urls.py file --- 
+    from . import views
+    from django.urls import path
+    
+    urlpatterns = [
+    path('<slug:slug>',views.WebsiteView.as_view(), name = 'website_view')
+    ]
+
+- goto translator folder --- urls.py --- inside urlpatterns;
+    
+    - add extra path; path('', include('website.urls'))
+    - import include
+
+ADMIN INTERFACE VIEWS
+================================
+
+- login with credentials; 
+- if we seen, groups and users but not posts
+- goto website folder--- admin.py;
+- create a model;
+    from .models import Post
+    admin.site.register(Post)
+- if you runserver you can also see "posts" along with " groups and users"
+- simple ---- in the posts add title and add whaterver you need.
+- if we seen in server the names are like obj1, obj2....
+- we confuse of selection a particular thing to change the internal changes.
+- goto website folder --- models.py --- add;
+        def __str__(self):
+                return self.title
+- this will gives the name of the posts
+- goto website folder ---- admin.py
+- create a class;
+        from .models import Post
+
+        class PostAdmin(admin.ModelAdmin):
+                list_display = ('title', 'date_created', 'author')
+                
+        admin.site.register(Post, PostAdmin)
+
+CREATING A HOMEPAGE
+======================
+
+- goto templates folder --- create a new file; "index.html"
+- goto urls.py file --- website folder
+    add; path('', views.HomeView.as_view(), name = 'home_view')
+- goto views.py -- create a view
+    add; 
+    
+    class HomeView(generic.TemplateView):
+                template_name = 'index.html'
+
+CREATING AN ABOUT page
+==============================
+
+- rename;
+        index.html as about.html.
+        views.py -- index.html to about.html
+        HomeView to Aboutview
+        urls.py -- HomeView to Aboutview
+        home_view to about_view
+        '' to 'about/'
+    # if we seen when it is executed, homepage is not valid but if we gone to about page , it is valid.
+
+LISTING WEBSITE POSTS ON HOMEPAGE
+======================================
+
+- create -- index.html in templates
+        
+        {% for post in post_list %}
+
+            {{ post.title }}
+            {{post.author}}
+
+        {% endfor %}
+
+    # what is meant by post_view;
+        - a view which we need to define in views.py
+- goto -- viws.py;
+
+    class PostList(generic.ListView):
+        queryset = Post.objects.filter(status=1).order_by('date_created')
+        template_name: 'index.html'
+
+- goto -- urls.py;
+
+    add; path('',views.PostList.as_view(), name = 'home_view')
+
+CREATING LINKS
+=================
+
+- index.html;
+    <a href="{% url 'website_view' post.slug %}"><h2>{{ post.title }}</h2></a>
+
+ADDING BOOTSTRAP TO DJANGO
+=============================
+
+- copy - paste the links of css and js script
+- add div tags in index.html inside body tag
+
+DJANGO TEMPLATES FILTERS 
+==============================
+
+google search - django template filters
+
+TEMPLATE INHERITANCE
+============================

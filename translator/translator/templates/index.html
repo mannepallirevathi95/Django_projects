@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>website</title>
+    <link rel="stylesheet" href="	https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container m-4">
+        {% for post in post_list %}
+        <div class="card m-3">
+            <div class="card-body">
+                <a href="{% url 'website_view' post.slug %}">
+                    <h4 class="card-title btn btn-info btn-s">
+                        {{ post.title }}
+                    </h4>
+                </a>
+                <blockquote class="blockquote mb-0 m-3">
+                    <p class="card-text">
+                        {{ post.content | slice:"100" }}
+                    </p>
+                    <footer class="blockquote-footer">
+                        {{ post.author }}
+                    </footer>
+                </blockquote>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
